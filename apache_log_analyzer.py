@@ -15,3 +15,14 @@ Continue = input("Would you like to continue? Please reply with Y or N for yes o
 
 #This line prints for the user a recognition that their entry was received
 print(f"Thank you for your input, {Continue}")
+
+#converting apache log info into a string and attaching it to a variable
+apache_log_address = '111.222.333.123 HOME - [01/Feb/1998:01:08:39 -0800] "GET /bannerad/ad.htm HTTP/1.0" 200 198 "http://www.referrer.com/bannerad/ba_intro.htm" "Mozilla/4.01 (Macintosh; I; PPC)"'
+
+#Slice code to isolate IP address from the beginning of the string, and print it
+slice_ip = apache_log_address[0:15]
+print(f"Log request from:{slice_ip:*^22}")
+
+#Using split function to print the return code value from the apache log string
+split_log = apache_log_address.split()
+print(f"Return Code: {split_log[8]}")
