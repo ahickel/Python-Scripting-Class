@@ -16,15 +16,21 @@ print(CourseDescription)
 #This line prints for the user a recognition that their entry was received
 #print(f"Thank you for your input, {Continue}")
 
-#converting apache log info into a single string, while making sure to add in new lines using \n for each entry, and attaching the log entries to a single variable.
-apache_logs ='111.222.333.123 HOME - [01/Feb/1998:01:08:39 -0800] "GET /bannerad/ad.htm HTTP/1.0" 200 198 "http://www.referrer.com/bannerad/ba_intro.htm" "Mozilla/4.01 (Macintosh; I; PPC)" \n111.222.333.124 HOME - [01/Feb/1998:01:08:46 -0800] "GET /bannerad/ad.htm HTTP/1.0" 200 28083 "http://www.referrer.com/bannerad/ba_intro.htm" "Mozilla/4.01 (Macintosh; I; PPC)" \n111.222.333.125 AWAY - [01/Feb/1998:01:08:53 -0800] "GET /bannerad/ad7.gif HTTP/1.0" 401 9332 "http://www.referrer.com/bannerad/ba_ad.htm" "Mozilla/4.01 (Macintosh; I; PPC)" \n111.222.333.126 AWAY - [01/Feb/1998:01:09:14 -0800] "GET /bannerad/click.htm HTTP/1.0" 501 207 "http://www.referrer.com/bannerad/menu.htm" "Mozilla/4.01 (Macintosh; I; PPC)"'
+#this opens our access log and assigns it to a variable after we read the contents of the log
+logFile = open("m4-access.log","r")
+apache_logs = logFile.read()
 
-#This code converts each log entry into a list, using the split function, by seperating each entry with the \n break.
-seperated_log_list = apache_logs.split("\n")
+#next we split the log as you requested us not to use the readlines function in the assignment, that would shortcut this process by reading and spliting the lines in one process. 
+apache_logs_split = apache_logs.split("\n")
 
-#creating a 'for' loop to isolate each log entry while also slicing code to print the isolated IP address from the beginning of the string. We're also using split function to print the return code value from the isolated apache log string, which has been converted into a list within the loop.
-for log in seperated_log_list:
-    slice_ip = log[0:15]
-    print(f"Log request from: {slice_ip:*^22}")
-    split_log = log.split()
-    print(f"Return Code: {split_log[8]}")
+#opening (will also create text file if it has not been created yet) apache_analysis.txt in preperation for the 'for' loop, using the "a" function to append our entries one at a time into the new txt file as the loop progresses.
+newFile = open("apache_analysis.txt", "a")
+
+#creating a 'for' loop to isolate each log entry for its ip address and HTTP return code, printing those values as they are split off from each line, and then appending each entry into a new file called apache_analysis.txt, and giving each entry its own line using \n.
+for log in apache_logs_split:
+    split_entries = log.split()
+    isolated_ip_return_code = f"{split_entries[0]} - {split_entries[8]}"
+    print(isolated_ip_return_code)
+    newFile.write(f"{isolated_ip_return_code}\n")
+
+#note I did not close the files as that was not stated in the assignment but normally I would at the end, trying to follow assignement to the letter.
