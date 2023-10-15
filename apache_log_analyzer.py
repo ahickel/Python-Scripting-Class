@@ -12,69 +12,60 @@ CourseDescription= "Welcome! This program will help you to parse information fro
 import sys
 
 #I set an if condition to see if someone is trying to pass an arguement, specifically "y" to bypass the input function.
-if len(sys.argv) >=2 and sys.argv[1] == "y":
+if len(sys.argv) > 1 and sys.argv[1] == "y":
+    Continue = sys.argv[1]
 
-    #This prints the variable containing the shortened course description.
+#creating the else statement in case no arguement is passed, the program can continue.    
+else: 
+    #Setting up input sequence if there is no arguement to bypass it.
+    Continue = input("Would you like to continue? Please reply with Y or N for yes or no.")
+    #Printing the result of their successful input.
+    print(f"Thank you for your input, {Continue}")
+
+#If condition to pass their input through to verify if it's y, yeah, or yes.
+if Continue.lower() == "y" or Continue.lower() == "yeah" or Continue.lower() == "yes":
+    #Printing course description for this set.
     print(CourseDescription)
-
-    #opening the log file and reading it into a value.
+    
+    #This opens our access log and assigns it to a variable after we read the contents of the log.
     logFile = open("m5-access.log","r")
     apache_logs = logFile.read()
 
     #Next we split the log as you requested us not to use the readlines function in the assignment, that would shortcut this process by reading and spliting the lines in one process. 
     apache_logs_split = apache_logs.split("\n")
 
-    #Opening (will also create text file if it has not been created yet) apache_analysis.txt in preperation for the 'for' loop, using the "a" function to append our entries one at a time into the new txt file as the loop progresses.
-    newFile = open("apache_analysis.txt", "a")
+    #Opening (will also create text file if it has not been created yet) apache_analysis.txt in preperation for the 'for' loop, using the "w" function to write our entries one at a time into the new txt file as the loop progresses.
+    newFile = open("apache_analysis.txt", "w")
 
-    #Creating a 'for' loop to isolate each log entry for its ip address and HTTP return code, but only if the return code is equal to, or greater than 500 will it write to the apache_analysis.txt file, appending to it, and adding a new line. Then printing the return codes if they are 400 or greater as they are split off from each line.
+    #creating a dictionary for our IP addresses to be stored as keys. 
+    apache_log_summary = dict()
+
+    #Creating a 'for' loop to isolate each log entry for its ip address and HTTP return code, Then printing the return codes if they are 400 or greater as they are split off from each line. Also isolating the IP address by itself, and writing into the dictionary. For every additional pass of the same IP we will increase the stored value by 1 in the dictionary using an if statement.
     for log in apache_logs_split:
         split_entries = log.split()
-        if int(split_entries[8]) >=500:
-            isolated_ip_return_code_large = f"{split_entries[0]} - {split_entries[8]}"
-            newFile.write(f"{isolated_ip_return_code_large}\n")
+        #if int(split_entries[8]) >=500:
+        #isolated_ip_return_code_large = f"{split_entries[0]} - {split_entries[8]}"
+        IP = split_entries[0]
+        
+        IP_in_dict = apache_log_summary.keys()
+        
+        if IP in IP_in_dict:
+            apache_log_summary[IP] += 1
+        else:
+            apache_log_summary[IP] = 1 
+        
+        #newFile.write(f"{isolated_ip_return_code_large}\n")
         if int(split_entries[8]) >=400:
             isolated_ip_return_code_small = f"{split_entries[0]} - {split_entries[8]}"
             print(isolated_ip_return_code_small)
-
-        #Note I did not close the files as that was not stated in the assignment but normally I would at the end, trying to follow assignement to the letter.
-#Supplying an elif statement to negotiate not having a bypass arguement to skip the input for the second half of the program.
-elif len(sys.argv) !=2 or sys.argv[1] != "y":
     
-    #Printing course description for this set.
-    print(CourseDescription)
+    #this for loop isolates only the IP address from the dictionary that are found more than, or equal to 5 times, and writes them to our analysis file.
+    for key in apache_log_summary:
+        if apache_log_summary[key] >= 5:
+            newFile.write(f"{key} has {apache_log_summary[key]}\n")
     
-    #Setting up input sequence if there is no arguement to bypass it.
-    Continue = input("Would you like to continue? Please reply with Y or N for yes or no.")
+    #Note I did not close the files as that was not stated in the assignment but normally I would at the end, trying to follow assignement to the letter.
 
-    #If condition to pass their input through to verify if it's y, yeah, or yes.
-    if Continue.lower() == "y" or Continue.lower() == "yeah" or Continue.lower() == "yes":
-        
-        #Printing the result of their successful input.
-        print(f"Thank you for your input, {Continue}")
-        
-        #This opens our access log and assigns it to a variable after we read the contents of the log.
-        logFile = open("m5-access.log","r")
-        apache_logs = logFile.read()
-
-        #Next we split the log as you requested us not to use the readlines function in the assignment, that would shortcut this process by reading and spliting the lines in one process. 
-        apache_logs_split = apache_logs.split("\n")
-
-        #Opening (will also create text file if it has not been created yet) apache_analysis.txt in preperation for the 'for' loop, using the "a" function to append our entries one at a time into the new txt file as the loop progresses.
-        newFile = open("apache_analysis.txt", "a")
-
-        #Creating a 'for' loop to isolate each log entry for its ip address and HTTP return code, but only if the return code is equal to, or greater than 500 will it write to the apache_analysis.txt file, appending to it, and adding a new line. Then printing the return codes if they are 400 or greater as they are split off from each line.
-        for log in apache_logs_split:
-            split_entries = log.split()
-            if int(split_entries[8]) >=500:
-                isolated_ip_return_code_large = f"{split_entries[0]} - {split_entries[8]}"
-                newFile.write(f"{isolated_ip_return_code_large}\n")
-            if int(split_entries[8]) >=400:
-                isolated_ip_return_code_small = f"{split_entries[0]} - {split_entries[8]}"
-                print(isolated_ip_return_code_small)
-
-        #Note I did not close the files as that was not stated in the assignment but normally I would at the end, trying to follow assignement to the letter.
-
-    #Else statement stopping the program if the user inputs any value other than the assigned values to continue at the beginning.
-    else:
-        print("You choose not to continue.")
+#Else statement stopping the program if the user inputs any value other than the assigned values to continue at the beginning.
+else:
+    print("You choose not to continue.")
