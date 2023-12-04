@@ -7,18 +7,24 @@
 #importing the request, argparse, subprocess, and json modules to handle http requests, parse log entries, and use linux commands within our python script.
 import requests, argparse, subprocess, json
 
-#creating our IPLookup function to do a get request for our URL while using a formatted string to pass the arguement from the function into the url and then to pass our most popular IP address which will be a result from our IPAddressCount function into our new Lookup function while loading the json file into a dictionary for easier access in order to parse out specific keys for the assignment.
+#creating our IPLookup function to do a get request for our URL while using a formatted string to pass the arguement from the function into the url and then to pass our most popular IP address which will be a result from our IPAddressCount function into our new Lookup function while loading the json file into a dictionary for easier access in order to parse out specific keys for the assignment. In this case we are adding a API key to the header in order to properly access the websites resources. Once we get that information we are loading the results of our search using the API into a dictionary, and then storing the category we want into a variable and printing the results. 
 def IPLookup(IPAddress):
-    response = requests.get(f"https://ipinfo.io/{IPAddress}/json")
-    print(f"https://ipinfo.io/{IPAddress}/json")
+    credFile = open('/home/student/.credentials-vt','r')
+    credentials = credFile.readlines()
+    api_key = credentials[0].split('=')[1].strip()
+    headerVariable = {"x-apikey" : api_key}
+    response = requests.get(f"https://virustotal.com/api/v3/ip_addresses/{IPAddress}", headers=headerVariable)
+    print(f"https://virustotal.com/api/v3/ip_addresses/{IPAddress}")
     json_dict = json.loads(response.text)
-    for key in json_dict:
-        if key == "org":
-            org = json_dict["org"]
-            print(f"... IP ORG: {org}")
-        if key == "city":
-            city = json_dict["city"]
-            print(f"... IP City: {city}")
+    category = json_dict["data"]["attributes"]["last_analysis_results"]["BitDefender"]["category"]
+    print(f"Bitdefender category: {category}")
+    #for key in json_dict:
+        #if key == "org":
+            #org = json_dict["org"]
+            #print(f"... IP ORG: {org}")
+        #if key == "city":
+            #city = json_dict["city"]
+            #print(f"... IP City: {city}")
 
     #myHTML = bs4.BeautifulSoup(response.text, features ="html.parser")
     #print(myHTML.find_all("dd", class_="col-8 text-monospace")[1].text)
