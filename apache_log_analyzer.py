@@ -4,16 +4,24 @@
 # I use Word Wrap to make reading easier.
 # Course Description: During the course project we will be adding new functionality to our scripts in order to process Apache Log entries. The Apache log entries comes from Apache web servers. We will summarize the data in the log to identitfy potential security threats, and deal with those threats by using different web services.
 
-#importing the request, argparse, subprocess, and beautiful soup 4 modules to handle http requests, parse log entries, and use linux commands within our python script.
-import requests, argparse, subprocess, bs4
+#importing the request, argparse, subprocess, and json modules to handle http requests, parse log entries, and use linux commands within our python script.
+import requests, argparse, subprocess, json
 
-#creating our IPLookup function to do a get request for our URL while using a formatted string to pass the arguement from the function into the url and then to pass our most popular IP address which will be a result from our IPAddressCount function into our new Lookup function while also printing the first 250 characters of the website at that url and pulling the beautiful soup HTML code from the HTML code to get information about the owner of the IP address printing it to the screen.
+#creating our IPLookup function to do a get request for our URL while using a formatted string to pass the arguement from the function into the url and then to pass our most popular IP address which will be a result from our IPAddressCount function into our new Lookup function while loading the json file into a dictionary for easier access in order to parse out specific keys for the assignment.
 def IPLookup(IPAddress):
-    response = requests.get(f"https://tools.keycdn.com/geo?host={IPAddress}")
-    print(f"https://tools.keycdn.com/geo?host={IPAddress}")
-    print(response.text[:250])
-    myHTML = bs4.BeautifulSoup(response.text, features ="html.parser")
-    print(myHTML.find_all("dd", class_="col-8 text-monospace")[1].text)
+    response = requests.get(f"https://ipinfo.io/{IPAddress}/json")
+    print(f"https://ipinfo.io/{IPAddress}/json")
+    json_dict = json.loads(response.text)
+    for key in json_dict:
+        if key == "org":
+            org = json_dict["org"]
+            print(f"... IP ORG: {org}")
+        if key == "city":
+            city = json_dict["city"]
+            print(f"... IP City: {city}")
+
+    #myHTML = bs4.BeautifulSoup(response.text, features ="html.parser")
+    #print(myHTML.find_all("dd", class_="col-8 text-monospace")[1].text)
 
 #creating a new function to run our bash shell script to parse the most common IP address from our Apache log file that is input as part of an arguement later on in our code. The function then splits the result of the most common IP address from that list, and returns the value of the most common one isolated to display only the IP address as the Isolated_IP value.
 def IPAddressCount(apache_log_file_name):
